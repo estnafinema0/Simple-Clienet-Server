@@ -6,6 +6,7 @@ This project demonstrates a basic TCP client and server in C. The server waits f
 An important detail is the use of the `SO_REUSEADDR` option on the server’s socket. It allows the server to immediately reuse the same port after shutting down, avoiding the usual wait caused by the **TIME_WAIT** state in TCP. Without `SO_REUSEADDR`, you would often see an `Address already in use` error when trying to restart the server on the same port too quickly.
 
 ## Features
+
 1. **Simple TCP Communication**: Send and receive messages between a client and server.
 2. **Graceful Shutdown**: Typing `"revoir"` on either side closes the connection.
 3. **Up to 4 Pending Connections**: The server uses listen(sockfd, 4), which allows up to 4 simultaneous connection requests in the backlog.
