@@ -42,7 +42,7 @@ Replace `127.0.0.1` with the actual IP address or hostname of your server if you
 - After the client connects, you can type messages in each terminal.  
 - The keyword `"revoir"` (typed by server) will terminate the connection and exit.
 
-## Explanation of TIME_WAIT and Port Reuse
+## TIME_WAIT and Port Reuse
 In TCP, after a connection is closed, the socket often remains in the **TIME_WAIT** state for a short period. During this time, the operating system prevents you from immediately reusing the same address and port to avoid conflicts with lingering packets from the previous connection.
 
 By using:
