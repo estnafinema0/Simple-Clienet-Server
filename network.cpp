@@ -70,6 +70,11 @@ namespace Net
         return Socket(accept(m_Sockfd, addr.AsSockaddr(), &length));
     }
 
+    int Socket::WriteTo(std::span<char> buf)
+    {
+        return write(m_Sockfd, buf.data(), buf.size_bytes());
+    }
+
     InetSocketAddress::InetSocketAddress(int port)
     {
         m_Addr.sin_port = htons(port);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <span>
 #include <bitset>
 #include <netinet/in.h>
 
@@ -35,5 +36,7 @@ namespace Net
         void Bind(const InetSocketAddress& addr, const SocketOptions& opts);
         void Listen(int queue_length);
         Socket AcceptInet();
+
+        int WriteTo(std::span<char> buf);
     };
 }
