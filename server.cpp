@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     int option = 1; //To reuse the same port 
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
 
-    bzero((char *)&serv_add, serv_len);
+    bzero(&serv_add, serv_len);
     serv_add.sin_port = htons(portno);
     serv_add.sin_family = AF_INET;
     serv_add.sin_addr.s_addr = INADDR_ANY;
