@@ -25,9 +25,20 @@ namespace Net
             error("Failed to create socket");
     }
 
+    Socket::Socket(int sockfd)
+        : m_Sockfd(sockfd)
+    {}
+
     Socket::~Socket()
     {
         close(m_Sockfd);
+    }
+
+    Socket& Socket::operator=(Socket&& sock)
+    {
+        m_Sockfd = sock.m_Sockfd;
+        sock.m_Sockfd = -1;
+        return *this;
     }
     
     void Socket::Bind(const InetSocketAddress& addr)
@@ -47,6 +58,17 @@ namespace Net
         Bind(addr);
     }
 
+    void Socket::Listen(int queue_length)
+    {
+        listen(m_Sockfd, queue_length);
+    }
+
+    Socket Socket::AcceptInet()
+    {
+        InetSocketAddress addr{};
+        socklen_t length = sizeof(sockaddr_in);
+        return Socket(accept(m_Sockfd, addr.AsSockaddr(), &length));
+    }
 
     InetSocketAddress::InetSocketAddress(int port)
     {
@@ -58,5 +80,10 @@ namespace Net
     const sockaddr* InetSocketAddress::AsSockaddr() const&
     {
         return reinterpret_cast<const sockaddr*>(&m_Addr);
+    }
+    
+    sockaddr* InetSocketAddress::AsSockaddr() &
+    {
+        return reinterpret_cast<sockaddr*>(&m_Addr);
     }
 }

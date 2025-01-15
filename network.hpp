@@ -14,8 +14,10 @@ namespace Net
         sockaddr_in m_Addr;
     public:
         InetSocketAddress(int port);
+        explicit InetSocketAddress() = default;
         
         const sockaddr* AsSockaddr() const&;
+        sockaddr* AsSockaddr() &;
     };
 
     class Socket
@@ -23,9 +25,15 @@ namespace Net
         int m_Sockfd;
     public:
         Socket(int domain, int type);
+        explicit Socket(int sockfd);
         ~Socket();
+
+        Socket& operator=(const Socket&) = delete;
+        Socket& operator=(Socket&& sock);
 
         void Bind(const InetSocketAddress& addr);
         void Bind(const InetSocketAddress& addr, const SocketOptions& opts);
+        void Listen(int queue_length);
+        Socket AcceptInet();
     };
 }
