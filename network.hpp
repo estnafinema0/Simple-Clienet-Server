@@ -25,10 +25,14 @@ namespace Net
     class Socket
     {
         int m_Sockfd;
+        int m_Domain;
     public:
         Socket(int domain, int type);
-        explicit Socket(int sockfd);
+        Socket(const Socket&) = delete;
+        Socket(Socket&& sock);
         ~Socket();
+
+        static Socket FromExisting(int sockfd, int domain);
 
         Socket& operator=(const Socket&) = delete;
         Socket& operator=(Socket&& sock);
@@ -36,10 +40,13 @@ namespace Net
         bool Bind(const InetSocketAddress& addr);
         bool Bind(const InetSocketAddress& addr, const SocketOptions& opts);
         void Listen(int queue_length);
-        Socket AcceptInet();
+        Socket Accept();
         bool Connect(const InetSocketAddress& addr);
 
         int WriteTo(std::span<char> buf);
         int ReadFromInto(std::span<char> buf);
+    private:
+        Socket AcceptInet();
+        Socket() = default;
     };
 }

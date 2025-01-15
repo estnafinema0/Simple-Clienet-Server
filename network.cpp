@@ -21,25 +21,38 @@ namespace
 namespace Net
 {
     Socket::Socket(int domain, int type)
+        : m_Domain(domain)
     {
-        m_Sockfd = socket(domain, type, 0);
+        m_Sockfd = socket(m_Domain, type, 0);
         if (m_Sockfd < 0)
             error("Failed to create socket");
     }
 
-    Socket::Socket(int sockfd)
-        : m_Sockfd(sockfd)
-    {}
+    Socket::Socket(Socket&& sock)
+        : m_Sockfd(sock.m_Sockfd), m_Domain(sock.m_Domain)
+    {
+        sock.m_Sockfd = -1;
+    }
 
     Socket::~Socket()
     {
         close(m_Sockfd);
+    }
+    
+    Socket Socket::FromExisting(int sockfd, int domain)
+    {
+        Socket sock{};
+        sock.m_Sockfd = sockfd;
+        sock.m_Domain = domain;
+        
+        return sock;
     }
 
     Socket& Socket::operator=(Socket&& sock)
     {
         m_Sockfd = sock.m_Sockfd;
         sock.m_Sockfd = -1;
+        m_Domain = sock.m_Domain;
         return *this;
     }
     
@@ -64,12 +77,18 @@ namespace Net
     {
         listen(m_Sockfd, queue_length);
     }
+    
+    Socket Socket::Accept()
+    {
+        if (m_Domain == AF_INET) return AcceptInet();
+        assert(0 && "Not implemented");
+    }
 
     Socket Socket::AcceptInet()
     {
         InetSocketAddress addr{};
         socklen_t length = sizeof(sockaddr_in);
-        return Socket(accept(m_Sockfd, addr.AsSockaddr(), &length));
+        return Socket::FromExisting(accept(m_Sockfd, addr.AsSockaddr(), &length), m_Domain);
     }
 
     bool Socket::Connect(const InetSocketAddress& addr)
