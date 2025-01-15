@@ -3,6 +3,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <cassert>
+#include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -41,12 +43,12 @@ namespace Net
         return *this;
     }
     
-    void Socket::Bind(const InetSocketAddress& addr)
+    bool Socket::Bind(const InetSocketAddress& addr)
     {
-        bind(m_Sockfd, addr.AsSockaddr(), sizeof(sockaddr_in));
+        return bind(m_Sockfd, addr.AsSockaddr(), sizeof(sockaddr_in)) == 0;
     }
 
-    void Socket::Bind(const InetSocketAddress& addr, const SocketOptions& opts)
+    bool Socket::Bind(const InetSocketAddress& addr, const SocketOptions& opts)
     {
         if ((opts & REUSE_PORT).any())
         {
@@ -55,7 +57,7 @@ namespace Net
         }
         static_assert(TOTAL_SOCKET_OPTIONS == 1);
         
-        Bind(addr);
+        return Bind(addr);
     }
 
     void Socket::Listen(int queue_length)
@@ -70,9 +72,19 @@ namespace Net
         return Socket(accept(m_Sockfd, addr.AsSockaddr(), &length));
     }
 
+    bool Socket::Connect(const InetSocketAddress& addr)
+    {
+        return connect(m_Sockfd, addr.AsSockaddr(), sizeof(sockaddr_in)) == 0;
+    }
+
     int Socket::WriteTo(std::span<char> buf)
     {
         return write(m_Sockfd, buf.data(), buf.size_bytes());
+    }
+
+    int Socket::ReadFromInto(std::span<char> buf)
+    {
+        return read(m_Sockfd, buf.data(), buf.size_bytes());
     }
 
     InetSocketAddress::InetSocketAddress(int port)
@@ -82,11 +94,19 @@ namespace Net
         m_Addr.sin_addr.s_addr = INADDR_ANY;
     }
 
+    InetSocketAddress::InetSocketAddress(int port, std::span<char> address)
+    {
+        m_Addr.sin_port = htons(port);
+        m_Addr.sin_family = AF_INET;
+        assert(address.size_bytes() <= sizeof(m_Addr.sin_addr.s_addr));
+        std::memcpy(&m_Addr.sin_addr.s_addr, address.data(), address.size_bytes());
+    }
+
     const sockaddr* InetSocketAddress::AsSockaddr() const&
     {
         return reinterpret_cast<const sockaddr*>(&m_Addr);
     }
-    
+
     sockaddr* InetSocketAddress::AsSockaddr() &
     {
         return reinterpret_cast<sockaddr*>(&m_Addr);

@@ -15,6 +15,7 @@ namespace Net
         sockaddr_in m_Addr;
     public:
         InetSocketAddress(int port);
+        InetSocketAddress(int port, std::span<char> address);
         explicit InetSocketAddress() = default;
         
         const sockaddr* AsSockaddr() const&;
@@ -32,11 +33,13 @@ namespace Net
         Socket& operator=(const Socket&) = delete;
         Socket& operator=(Socket&& sock);
 
-        void Bind(const InetSocketAddress& addr);
-        void Bind(const InetSocketAddress& addr, const SocketOptions& opts);
+        bool Bind(const InetSocketAddress& addr);
+        bool Bind(const InetSocketAddress& addr, const SocketOptions& opts);
         void Listen(int queue_length);
         Socket AcceptInet();
+        bool Connect(const InetSocketAddress& addr);
 
         int WriteTo(std::span<char> buf);
+        int ReadFromInto(std::span<char> buf);
     };
 }
