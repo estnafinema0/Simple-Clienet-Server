@@ -29,4 +29,34 @@ namespace Net
     {
         close(m_Sockfd);
     }
+    
+    void Socket::Bind(const InetSocketAddress& addr)
+    {
+        bind(m_Sockfd, addr.AsSockaddr(), sizeof(sockaddr_in));
+    }
+
+    void Socket::Bind(const InetSocketAddress& addr, const SocketOptions& opts)
+    {
+        if ((opts & REUSE_PORT).any())
+        {
+            int option = 1;
+            setsockopt(m_Sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+        }
+        static_assert(TOTAL_SOCKET_OPTIONS == 1);
+        
+        Bind(addr);
+    }
+
+
+    InetSocketAddress::InetSocketAddress(int port)
+    {
+        m_Addr.sin_port = htons(port);
+        m_Addr.sin_family = AF_INET;
+        m_Addr.sin_addr.s_addr = INADDR_ANY;
+    }
+
+    const sockaddr* InetSocketAddress::AsSockaddr() const&
+    {
+        return reinterpret_cast<const sockaddr*>(&m_Addr);
+    }
 }
