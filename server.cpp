@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 {
     if (argc != 2)
     {
-        fprintf(stderr, "Usage: <program file> <port>\n");
+        fprintf(stderr, "Usage: ./server <port>\n");
         exit(EXIT_FAILURE);
     }
 

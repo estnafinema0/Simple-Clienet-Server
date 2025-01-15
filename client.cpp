@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 {
     if (argc != 3)
     {
-        fprintf(stderr, "Usage: <program file> <hostname> <port>\n"); //hostname is the server ip address
+        fprintf(stderr, "Usage: ./client <hostname> <port>\n\n\t<hostname> is the server ip address\n");
         exit(EXIT_FAILURE);
     }
 
