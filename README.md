@@ -8,10 +8,8 @@ An important detail is the use of the `SO_REUSEADDR` option on the server’s so
 ## Features
 
 1. **Simple TCP Communication**: Send and receive messages between a client and server.
-2. **Graceful Shutdown**: Typing `"revoir"` on either side closes the connection.
-3. **Up to 4 Pending Connections**: The server uses listen(sockfd, 4), which allows up to 4 simultaneous connection requests in the backlog.
-4. **Port Reuse**: The code includes `setsockopt` with `SO_REUSEADDR` to allow reusing the same port shortly after the program closes.
-5. **Alternative Port**: Always you can just use another free port to avoid conflicts or TIME_WAIT issues.
+2. **Graceful shutdown**: Typing `"revoir"` on either side closes the connection.
+3. **Port reuse**: The code uses `setsockopt` with `SO_REUSEADDR` to allow reusing the same port shortly after the program closes (you can always just use another free port to avoid conflicts or TIME_WAIT issues).
 
 ## Compilation
 Compile the **server** and **client** separately with the following commands:
@@ -21,14 +19,16 @@ gcc -Wall server.c -o server
 gcc -Wall client.c -o client
 ```
 
-## Usage
+Now you have two executables: `server` and `client`.
+
+## How to Use It
 
 ### 1. Start the Server
-In a first terminal run the server on a chosen port (any number from 1024 to 49151):
+Start first terminal and start the server on your favorite port number from 1024 to 49151 (let’s say 5000):
 ```bash
 ./server 5000
 ```
-The server will wait for an incoming connection.
+The server will wait for a client to connect.
 
 ### 2. Start the Client
 In a second terminal (or on another machine), start the client by specifying the server hostname (IP) and the same port:
@@ -43,13 +43,13 @@ Replace `127.0.0.1` with the actual IP address or hostname of your server if you
 - The keyword `"revoir"` (typed by server) will terminate the connection and exit.
 
 ## TIME_WAIT and Port Reuse
-In TCP, after a connection is closed, the socket often remains in the **TIME_WAIT** state for a short period. During this time, the operating system prevents you from immediately reusing the same address and port to avoid conflicts with lingering packets from the previous connection.
+In TCP, after a connection is closed, the socket often remains in the **TIME_WAIT** state for a short period. During this time, the OS won`t let you to immediately reuse the same address and port to avoid possible conflicts.
 
 By using:
 ```c
 int option = 1;
 setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
 ```
-we allow OS re-bind to that port even if it is still in **TIME_WAIT**. This is why you can restart the server on the **same port** right away without seeing the error `Address already in use`.  
+we allow OS re-bind to that port even if it is still in **TIME_WAIT**. 
 
-If you prefer not to use `SO_REUSEADDR` or if you encounter any port conflicts, you can simply choose **another port** (ex., `5001`) and run the code again.
+If you prefer not to use `SO_REUSEADDR` or if you rigorously do not want any port conflicts, you can simply choose **another port** (ex., `5001`) and run the code again.
