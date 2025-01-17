@@ -14,7 +14,7 @@
 #define BUFFER_LEN 256
 
 
-void newClient(Net::Socket client, int clientnum);
+void newClientthread(Net::Socket client, int clientnum);
 
 void error(const char *msg)
 {
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
         pid_t pid;
         ++clientnum;
         if ((pid = fork()) == -1) error("Fork");
-        else if (pid == 0) newClient(std::move(client), clientnum);
+        else if (pid == 0) newClientthread(std::move(client), clientnum);
         
         pids.push_back(pid);
         for (auto pid: pids)
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void newClient(Net::Socket client, int clientnum)
+void newClientthread(Net::Socket client, int clientnum)
 {
     char buffer[BUFFER_LEN] = {};
     int bytes_rw;
