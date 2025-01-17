@@ -8,7 +8,7 @@ An important detail is the use of the `SO_REUSEADDR` option on the server’s so
 ## Features
 1. **Simple TCP Communication**: Send and receive messages between a client and server.
 2. **Graceful Shutdown**: Typing `"revoir"` on either side closes the connection.
-3. **Up to 4 Pending Connections**: The server uses listen(sockfd, 4), which allows up to 4 simultaneous connection requests in the backlog. (P.S. )
+3. **Up to 4 Pending Connections**: The server uses listen(sockfd, 4), which allows up to 4 simultaneous connection requests in the backlog. (P.S. ih this version several connected clients are not possible, but it is realised in the **"Client-Server-cpp-threads"** and **"Client-Server-cpp-threads"**)
 4. **Port Reuse**: The code includes `setsockopt` with `SO_REUSEADDR` to allow reusing the same port shortly after the program closes.
 5. **Alternative Port**: Always you can just use another free port to avoid conflicts or TIME_WAIT issues.
 
