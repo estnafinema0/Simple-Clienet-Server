@@ -1,7 +1,7 @@
 # README
 
 ## Overview
-This project demonstrates a basic TCP client and server in C. The server waits for incoming connections on a chosen port, and the client connects to the same port using the server’s hostname or IP address. After connection both programs can exchange messages. If either side sends the keyword `"revoir"`, the connection closes and both programs exit cleanly.
+This project demonstrates a basic TCP client and server in C++. The server waits for incoming connections on a chosen port, and the client connects to the same port using the server’s hostname or IP address. After connection both programs can exchange messages. If either side sends the keyword `"revoir"`, the connection closes and both programs exit cleanly.
 
 An important detail is the use of the `SO_REUSEADDR` option on the server’s socket. It allows the server to immediately reuse the same port after shutting down, avoiding the usual wait caused by the **TIME_WAIT** state in TCP. Without `SO_REUSEADDR`, you would often see an `Address already in use` error when trying to restart the server on the same port too quickly.
 
