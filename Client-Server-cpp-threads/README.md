@@ -1,55 +1,103 @@
 # README
 
-## Overview
-This project demonstrates a basic TCP client and server in C++. The server waits for incoming connections on a chosen port, and the client connects to the same port using the server’s hostname or IP address. After connection both programs can exchange messages. If either side sends the keyword `"revoir"`, the connection closes and both programs exit cleanly.
-
-An important detail is the use of the `SO_REUSEADDR` option on the server’s socket. It allows the server to immediately reuse the same port after shutting down, avoiding the usual wait caused by the **TIME_WAIT** state in TCP. Without `SO_REUSEADDR`, you would often see an `Address already in use` error when trying to restart the server on the same port too quickly.
+## Welcome to the OOP Network Echo Server
+Yes, it's yet another TCP client-server project. Now in C++. But this time, everything is built around an object-oriented design, complete with classes, threads, and mutexes for synchronization.
 
 ## Features
+1. **Object-Oriented Paradigm**  
+   We've reorganized the code into C++ classes that handle low-level networking details:
+   - **`Net::Socket`**: Encapsulates socket operations like `bind`, `connect`, `listen`, `accept`, as well as reading/writing data.
+   - **`Net::InetSocketAddress`**: A simple wrapper for `sockaddr_in`, making it easier to manage IP addresses and ports.
 
-1. **Simple TCP Communication**: Send and receive messages between a client and server.
-2. **Graceful shutdown**: Typing `"revoir"` on either side closes the connection.
-3. **Port reuse**: The code uses `setsockopt` with `SO_REUSEADDR` to allow reusing the same port shortly after the program closes (you can always just use another free port to avoid conflicts or TIME_WAIT issues).
+2. **Multi-Client Support via Threads**  
+   The server can now spawn a separate thread for each incoming client connection (using the C++ `<thread>` library), so multiple clients can connect at the same time.
+
+3. **Mutex-based Synchronization**  
+   A global `std::mutex` ensures that when multiple clients send messages concurrently, their responses are handled in the order the server receives them. Essentially, the server won't interleave its replies from different threads in a messy way.
+
+4. **Graceful Client-Server Shutdown**  
+   By typing the keyword `revoir` during your session, you can politely end the connection from either side.
+
+5. **Port Reuse**  
+   Like before, you can reuse ports by setting the `SO_REUSEADDR` option if you want to quickly restart the server without those pesky “port already in use” errors.
 
 ## Compilation
-Compile the **server** and **client** separately with the following commands:
+We provide a `makefile` for convenience. Simply open a terminal in the project folder and run:
 
 ```bash
-gcc -Wall server.c -o server
-gcc -Wall client.c -o client
+make
 ```
 
-Now you have two executables: `server` and `client`.
+This will produce two executables, **`server`** and **`client`**. If you prefer, you can also compile them individually:
+
+```bash
+make server
+make client
+```
+
+To clean up old binaries:
+
+```bash
+make clean
+```
 
 ## How to Use It
 
 ### 1. Start the Server
-Start first terminal and start the server on your favorite port number from 1024 to 49151 (let’s say 5000):
+In one terminal, run:
+```bash
+./server <port>
+```
+Replace `<port>` with a number between 1024 and 49151 (for example, `5000`). The server will listen on that port and await connections from clients.
+
+For example, 
 ```bash
 ./server 5000
 ```
-The server will wait for a client to connect.
 
 ### 2. Start the Client
-In a second terminal (or on another machine), start the client by specifying the server hostname (IP) and the same port:
+Open another terminal (or use another machine, if you sure about your friend) and run:
+```bash
+./client <hostname> <port>
+```
+- `<hostname>` is the server address (e.g., `127.0.0.1` for localhost).
+- `<port>` must be the same port you used for the server.
+
+For example, 
 ```bash
 ./client 127.0.0.1 5000
 ```
-Use `127.0.0.1` if you are runnimg on the local machine.
-Replace `127.0.0.1` with the actual IP address or hostname of your server if you are running it on a remote machine.
 
-### 3. Exchange Messages
-- After the client connects, you can type messages in each terminal.  
-- The keyword `"revoir"` (typed by server) will terminate the connection and exit.
+### Step 3: Exchange Messages
+Ok! Time to the fun part:  
+- Type your message on the client side and press Enter.  
+- The server will receive it, and then (from the server’s terminal) you can type a reply back to the client.  
 
-## TIME_WAIT and Port Reuse
-In TCP, after a connection is closed, the socket often remains in the **TIME_WAIT** state for a short period. During this time, the OS won`t let you to immediately reuse the same address and port to avoid possible conflicts.
+If don't have enough partners to try this cool thing - split the terminal and run the second client with the same port and ip address.
+Because of the mutexes - there are will be no conflicts, while answering to the multiple clients  in the server terminal.
 
-By using:
-```c
-int option = 1;
-setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+This exchange continues until someone decides to end the conversation.
+
+### Example Session
+
+**On the Server side:**  
 ```
-we allow OS re-bind to that port even if it is still in **TIME_WAIT**. 
+$ ./server 5000
+Client, id - 1, pid - 12345: Hello from the client!
+MEServer, id - 1, pid - 12345:
+```
+*(You type your response here, say “Wow! You've coped with it!” and press Enter.)*
 
-If you prefer not to use `SO_REUSEADDR` or if you rigorously do not want any port conflicts, you can simply choose **another port** (ex., `5001`) and run the code again.
+**On the Client side:**  
+```
+$ ./client 127.0.0.1 5000
+MEClient:
+Hello from the client!
+Server:
+Wow! You've coped with it!
+```
+
+### Step 4: Exit When Done
+Type `revoir` on the server side to gracefully close the connection for that particular client. You can keep the server running to accept new connections from other clients if you wish.
+
+Make your clients happy with you!
