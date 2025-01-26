@@ -6,10 +6,10 @@ This repository contains multiple variations of a TCP client-server application 
 
 ### Variations
 
-1. **Simple-Client-Server** *(Coming Soon!)*  
+1. **Simple-Client-Server** 
    A simpler, single-client implementation showcasing the basics network socket programming in c.
 
-2. **Client-Server-Calculator** *(Coming Soon!)*  
+2. **Client-Server-Calculator** 
    A simpler, single-client implementation showcasing the basics network socket programming in c, which is a calculator with basic operations.
    
 3. **Client-Server-cpp-fork**  
